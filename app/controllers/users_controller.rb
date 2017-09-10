@@ -1,11 +1,14 @@
 class UsersController < ApplicationController
   before_action :set_user, only: [:show, :update]
-  before_action :authenticate_user!
+  # before_action :authenticate_user!
 
   # GET /users
   def index
-    @users = User.all
-
+    query = params[:query] || ""
+    @users = User.all.order(lastname: :asc)
+    if query
+      @users = @users.where("(LOWER(firstname) || ' ' || LOWER(lastname)) LIKE LOWER(?)","%#{query}%")
+    end
     render json: @users
   end
 
@@ -26,7 +29,7 @@ class UsersController < ApplicationController
       render json: {error: "not allowed"},status:401
       return
     end
-    
+
     if @user.update(user_params)
       render json: @user
     else
@@ -44,7 +47,7 @@ class UsersController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def user_params
-      params.require(:user).permit(:firstname, :lastname)
+      params.require(:user).permit(:firstname, :lastname,:description)
     end
 
 
