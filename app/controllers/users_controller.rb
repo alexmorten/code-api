@@ -16,10 +16,17 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /users/1
   def update
-    if @current_user != @user
-      render json: {error: "not allowed"},status:401
-      return 
+
+    if user_params[:status] && @current_user.status !="admin"
+      render json: {error:"not allowed"},status:401
+      return true
     end
+
+    if !(@current_user == @user || @current_user.status == "staff")
+      render json: {error: "not allowed"},status:401
+      return
+    end
+    
     if @user.update(user_params)
       render json: @user
     else
