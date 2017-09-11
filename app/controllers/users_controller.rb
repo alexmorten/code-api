@@ -1,13 +1,17 @@
 class UsersController < ApplicationController
   before_action :set_user, only: [:show, :update]
-  # before_action :authenticate_user!
+  before_action :authenticate_user!
 
   # GET /users
   def index
     query = params[:query] || ""
+    status = params[:status]
     @users = User.all.order(lastname: :asc)
     if query
       @users = @users.where("(LOWER(firstname) || ' ' || LOWER(lastname)) LIKE LOWER(?)","%#{query}%")
+    end
+    if status
+      @users = @users.where(status: status)
     end
     render json: @users
   end
